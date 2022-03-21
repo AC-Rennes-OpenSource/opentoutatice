@@ -5,7 +5,7 @@
 
 	<groupId>opentoutatice-ecm.platform</groupId>
 	<artifactId>opentoutatice-ecm-platform-parent</artifactId>
-	<version>4.7.43-RAB-RC01</version>
+	<version>4.7.43-RAB-RC01-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>open toutatice plate-forme</name>
 
@@ -456,7 +456,7 @@
 		<url>https://github.com/AC-Rennes-OpenSource/opentoutatice</url>
 		<connection>scm:git:https://github.com/AC-Rennes-OpenSource/opentoutatice.git</connection>
 		<developerConnection>scm:git:https://github.com/AC-Rennes-OpenSource/opentoutatice.git</developerConnection>     
-		<tag>4.7.43-RAB-RC01</tag> 
+		<tag>HEAD</tag> 
 	</scm>
 
 	<distributionManagement>
