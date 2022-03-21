@@ -5,7 +5,7 @@
 
 	<groupId>opentoutatice-ecm.platform</groupId>
 	<artifactId>opentoutatice-ecm-platform-parent</artifactId>
-	<version>RAB-4.7.43-RC01-SNAPSHOT</version>
+	<version>4.7.43-RC01-SNAPSHOT-RAB</version>
 	<packaging>pom</packaging>
 	<name>open toutatice plate-forme</name>
 
