@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>opentoutatice-ecm.platform</groupId>
 		<artifactId>opentoutatice-ecm-platform-parent</artifactId>
-		<version>4.7.43-RAB-RC01-SNAPSHOT</version>
+		<version>RAB-4.7.43-RC01</version>
 	</parent>
 
 	<artifactId>opentoutatice-ecm-platform-distribution</artifactId>
