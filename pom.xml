@@ -24,7 +24,7 @@
 	</modules>
 
 	<properties>
-		<nuxeo.version>6.1.1</nuxeo.version>
+		<nuxeo.version>RAB-6.1.5</nuxeo.version>
 		<!-- <nuxeo.cap.version>6.0</nuxeo.cap.version>
 		<nuxeo.dam.version>6.0.0</nuxeo.dam.version>
 		<nuxeo.blogs.sites.version>1.2.0</nuxeo.blogs.sites.version> -->
