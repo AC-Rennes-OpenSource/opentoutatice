@@ -678,7 +678,9 @@ public class ToutaticeDocumentHelper {
 		// si UserWorspace => spaceId = dc:title (conversion en minuscule afin de
 		// pouvoir utiliser l'indexation sur cette méta-donnée)
 		if (ToutaticeNuxeoStudioConst.CST_DOC_TYPE_USER_WORKSPACE.equals(document.getType())) {
-			spaceId = document.getTitle().toLowerCase();
+		    // SpaceId can have yet be filled
+		    String spaceId_  = (String) document.getPropertyValue(ToutaticeNuxeoStudioConst.CST_DOC_SCHEMA_TOUTATICE_SPACEID);
+			spaceId = StringUtils.isNotBlank(spaceId_) ? spaceId_ : document.getTitle().toLowerCase();
 		} else {
 			// sinon récupérer la liste des spaceParents
 			final DocumentModelList spaceParentList = getParentSpaceList(session, document, runInUnrestrictedMode,
@@ -690,7 +692,9 @@ public class ToutaticeDocumentHelper {
 
 				if (ToutaticeNuxeoStudioConst.CST_DOC_TYPE_USER_WORKSPACE.equals(space.getType())) {
 					// si le type de ce space est UserWorkspace => spaceID = dc:title
-					spaceId = space.getTitle().toLowerCase();
+				    // SpaceId can have yet be filled
+		            String spaceId_  = (String) space.getPropertyValue(ToutaticeNuxeoStudioConst.CST_DOC_SCHEMA_TOUTATICE_SPACEID);
+		            spaceId = StringUtils.isNotBlank(spaceId_) ? spaceId_ : space.getTitle().toLowerCase();
 				} else {
 					// sinon spaceID = space.getId
 					spaceId = space.getId();

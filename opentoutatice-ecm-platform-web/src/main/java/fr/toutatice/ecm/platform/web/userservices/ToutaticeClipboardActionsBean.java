@@ -18,8 +18,14 @@
  */
 package fr.toutatice.ecm.platform.web.userservices;
 
+import java.io.File;
+import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,8 +45,17 @@ import org.nuxeo.ecm.core.api.UnrestrictedSessionRunner;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.platform.routing.api.DocumentRoute;
 import org.nuxeo.ecm.platform.routing.api.DocumentRoutingService;
+import org.nuxeo.ecm.platform.ui.web.auth.NXAuthConstants;
+import org.nuxeo.ecm.platform.ui.web.tag.fn.Functions;
+import org.nuxeo.ecm.platform.ui.web.util.BaseURL;
+import org.nuxeo.ecm.platform.ui.web.util.ComponentUtils;
 import org.nuxeo.ecm.webapp.clipboard.ClipboardActionsBean;
+import org.nuxeo.ecm.webapp.clipboard.DocumentListZipExporter;
+import org.nuxeo.runtime.api.Framework;
 
+import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeDocumentListZipExporter;
+import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeZipExporterUtils;
+import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeZipLimitException;
 import fr.toutatice.ecm.platform.core.constants.ExtendedSeamPrecedence;
 import fr.toutatice.ecm.platform.core.constants.ToutaticeNuxeoStudioConst;
 
@@ -191,7 +206,7 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
 		runner.runUnrestricted();
 	}
 
-	private class innerRemoveDocumentProxy extends UnrestrictedSessionRunner {
+	protected class innerRemoveDocumentProxy extends UnrestrictedSessionRunner {
 		private DocumentModel folder;
 		
 		public innerRemoveDocumentProxy(CoreSession session, DocumentModel folder) {
@@ -208,5 +223,68 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
 		}
 		
 	}
+	
+	 /*
+     * Download redirecting or not according to tmp file size.
+     * @see org.nuxeo.ecm.webapp.clipboard.ClipboardActionsBean#exportWorklistAsZip(java.util.List, boolean)
+     */
+    @Override
+    public String exportWorklistAsZip(List<DocumentModel> documents, boolean exportAllBlobs) throws ClientException {
+        File tmpFile = null;
+        try {
+            FacesContext context = FacesContext.getCurrentInstance();
+            ToutaticeDocumentListZipExporter zipExporter = new ToutaticeDocumentListZipExporter();
+            try {
+                tmpFile = zipExporter.exportWorklistAsZip(documents, documentManager, exportAllBlobs);
+            } catch (ClientException ce) {
+                if(ce.getCause() instanceof ToutaticeZipLimitException) {
+                    if(tmpFile != null) {
+                        tmpFile.delete();
+                    }
+                    
+                    facesMessages.add(StatusMessage.Severity.ERROR, resourcesAccessor.getMessages().get("label.zip.limit.exception"));
+                    
+                    Principal principal = this.documentManager.getPrincipal();
+                    String userName = principal != null ? principal.getName() : "unknown";
+                    log.error(String.format("User [%s] tried to export a ZIP which exceeded space left on disk (%s). The operation has been aborted.", userName, 
+                            Framework.getProperty(ToutaticeZipExporterUtils.MAX_SIZE_PROP)));
+                    
+                    return null;
+                }
+            }
+            if (tmpFile == null) {
+                // empty zip file, do nothing
+                setFacesMessage("label.clipboard.emptyDocuments");
+                return null;
+            } else {
+                if (tmpFile.length() > Functions.getBigFileSizeLimit()) {
+                    HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+                    request.setAttribute(NXAuthConstants.DISABLE_REDIRECT_REQUEST_KEY, true);
+                    String zipDownloadURL = BaseURL.getBaseURL(request);
+                    zipDownloadURL += "nxbigzipfile" + "/";
+                    zipDownloadURL += tmpFile.getName();
+                    try {
+                        context.getExternalContext().redirect(zipDownloadURL);
+                    } catch (IOException e) {
+                        log.error("Error while redirecting for big file downloader", e);
+                    }
+                } else {
+                    ComponentUtils.downloadFile(context, "clipboard.zip", tmpFile);
+                    
+                    if(tmpFile != null) {
+                        tmpFile.delete();
+                    }
+                }
+
+                return "";
+            }
+        } catch (IOException io) {
+            throw ClientException.wrap(io);
+        } finally {
+//            if (tmpFile != null) {
+//                tmpFile.delete();
+//            }
+        }
+    }
 
 }
