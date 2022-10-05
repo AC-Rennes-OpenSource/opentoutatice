@@ -84,6 +84,15 @@
             <event>documentMoved</event>
             <event>documentRestored</event>
         </listener>
+
+		<listener name="toutaticeSyncBinaryName" async="false"
+				  postCommit="false"
+				  enabled="true"
+				  class="fr.toutatice.ecm.platform.core.listener.ToutaticeSyncBinaryNameListener"
+				  priority="140">
+			<event>documentCreatedByCopy</event>
+			<event>documentModified</event>
+		</listener>
         
         <listener name="pictureViewListener" async="false" 
             postCommit="false"  class="fr.toutatice.ecm.platform.core.listener.ToutaticePictureViewListener" priority="20">
