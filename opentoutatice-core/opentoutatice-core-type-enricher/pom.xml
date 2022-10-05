@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>opentoutatice-ecm.platform</groupId>
 		<artifactId>opentoutatice-core</artifactId>
-		<version>RAB-4.7.45-RC01-SNAPSHOT</version>
+		<version>4.7.46-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>opentoutatice-core-type-enricher</artifactId>
