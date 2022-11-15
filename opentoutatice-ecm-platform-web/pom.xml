@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>opentoutatice-ecm.platform</groupId>
 		<artifactId>opentoutatice-ecm-platform-parent</artifactId>
-		<version>RAB-4.7.47-SNAPSHOT</version>
+		<version>RAB-4.7.46-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>opentoutatice-ecm-platform-web</artifactId>
@@ -16,14 +16,17 @@
 		<dependency>
 			<groupId>opentoutatice-ecm.platform</groupId>
 			<artifactId>opentoutatice-ecm-platform-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>opentoutatice-ecm.platform</groupId>
 			<artifactId>opentoutatice-ecm-platform-services</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
             <groupId>opentoutatice-ecm.platform</groupId>
             <artifactId>opentoutatice-ecm-platform-automation</artifactId>
+            <version>${project.version}</version>
         </dependency>
 		<dependency>
 			<groupId>org.nuxeo.ecm.platform</groupId>
