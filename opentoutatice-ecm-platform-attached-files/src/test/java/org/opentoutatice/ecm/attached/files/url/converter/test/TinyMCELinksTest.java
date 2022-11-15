@@ -19,8 +19,6 @@ import org.opentoutatice.ecm.attached.files.url.converter.DocumentContentConvert
  * @author david
  *
  */
-@RunWith(FeaturesRunner.class)
-@Features(RuntimeFeature.class)
 public class TinyMCELinksTest {
 
     /** Set of absolute external URLs. */
