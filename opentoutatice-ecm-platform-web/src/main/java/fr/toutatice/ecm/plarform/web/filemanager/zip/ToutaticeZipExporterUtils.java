@@ -15,7 +15,7 @@ import org.nuxeo.runtime.api.Framework;
  */
 public class ToutaticeZipExporterUtils {
     
-    protected static final Pattern SPACE_LEFT_PATTERN = Pattern.compile("^([0-9]+)([%]{1})$");
+    protected static final Pattern SPACE_LEFT_PATTERN = Pattern.compile("^([0-9]+)$");
     public static final String MAX_SIZE_PROP = "ottc.export.zip.tmp.limit.percent";
     
     public static double getTmpSpaceLeftPercent() {
@@ -27,11 +27,11 @@ public class ToutaticeZipExporterUtils {
         return (Double.valueOf(tmpFolder.getFreeSpace()) / Double.valueOf(tmpFolder.getTotalSpace())) * 100;
     }
     
-    public static double getTmpPossibleSpaceLeftPercent() throws ToutaticeZipLimitException {
+    public static double getTmpPossibleSpaceLeftPercent() throws ToutaticeZipLimitException, ToutaticeZipFormatException {
         return getPossibleSpaceLeftPercent(Framework.getProperty(MAX_SIZE_PROP));
     }
     
-    public static double getPossibleSpaceLeftPercent(String possibleSpaceLeft) throws ToutaticeZipLimitException {
+    public static double getPossibleSpaceLeftPercent(String possibleSpaceLeft) throws ToutaticeZipLimitException, ToutaticeZipFormatException {
         double res = -1;
         
         if(StringUtils.isNotBlank(possibleSpaceLeft)) {
@@ -39,14 +39,14 @@ public class ToutaticeZipExporterUtils {
             if(matcher.matches()) {
                 res = Double.valueOf(matcher.group(1));
             } else {
-                throw ToutaticeZipLimitException.property(MAX_SIZE_PROP);
+                throw new ToutaticeZipFormatException();
             }
         }
         
         return res;
     }
     
-    public static boolean stillTmpSpaceLeft() throws ToutaticeZipLimitException {
+    public static boolean stillTmpSpaceLeft() throws ToutaticeZipLimitException, ToutaticeZipFormatException {
         return (getTmpSpaceLeftPercent() > getTmpPossibleSpaceLeftPercent());
     }
     

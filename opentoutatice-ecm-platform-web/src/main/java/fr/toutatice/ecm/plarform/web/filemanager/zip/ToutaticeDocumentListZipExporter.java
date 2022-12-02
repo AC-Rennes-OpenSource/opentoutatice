@@ -78,7 +78,7 @@ public class ToutaticeDocumentListZipExporter extends DocumentListZipExporter {
                 } else if (bh != null) {
                     addBlobHolderToZip("", out, doc, data, blobList, bh, exportAllBlobs);
                 }
-            } catch (ToutaticeZipLimitException ze) {
+            } catch (ToutaticeZipLimitException | ToutaticeZipFormatException ze) {
                 try {
                     out.close();
                     fout.close();
@@ -118,7 +118,7 @@ public class ToutaticeDocumentListZipExporter extends DocumentListZipExporter {
     
     protected void addFolderToZip(String path, ZipOutputStream out, DocumentModel doc, byte[] data,
             CoreSession documentManager, StringBuilder blobList, boolean exportAllBlobs) throws ClientException,
-            IOException, ToutaticeZipLimitException {
+            IOException, ToutaticeZipLimitException, ToutaticeZipFormatException {
       
         String title = doc.getTitle();
         List<DocumentModel> docList = documentManager.getChildren(doc.getRef());
@@ -143,7 +143,7 @@ public class ToutaticeDocumentListZipExporter extends DocumentListZipExporter {
     }
     
     private void addBlobHolderToZip(String path, ZipOutputStream out, DocumentModel doc, byte[] data, StringBuilder blobList, BlobHolder bh,
-            boolean exportAllBlobs) throws IOException, ClientException, ToutaticeZipLimitException {
+            boolean exportAllBlobs) throws IOException, ClientException, ToutaticeZipLimitException, ToutaticeZipFormatException {
 
         List<Blob> blobs = new ArrayList<Blob>();
 
@@ -215,7 +215,7 @@ public class ToutaticeDocumentListZipExporter extends DocumentListZipExporter {
                 if (!ToutaticeZipExporterUtils.stillTmpSpaceLeft()) {
                     out.closeEntry();
                     buffi.close();
-                    throw ToutaticeZipLimitException.limit(Framework.getProperty(ToutaticeZipExporterUtils.MAX_SIZE_PROP));
+                    throw new ToutaticeZipLimitException();
                 }
                 count = buffi.read(data, 0, BUFFER);
             }
