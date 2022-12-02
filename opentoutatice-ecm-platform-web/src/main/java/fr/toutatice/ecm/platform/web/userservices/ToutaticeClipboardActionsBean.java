@@ -13,8 +13,8 @@
  *
  *
  * Contributors:
- *   mberhaut1
- *    
+ * mberhaut1
+ * 
  */
 package fr.toutatice.ecm.platform.web.userservices;
 
@@ -55,6 +55,7 @@ import org.nuxeo.runtime.api.Framework;
 
 import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeDocumentListZipExporter;
 import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeZipExporterUtils;
+import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeZipFormatException;
 import fr.toutatice.ecm.plarform.web.filemanager.zip.ToutaticeZipLimitException;
 import fr.toutatice.ecm.platform.core.constants.ExtendedSeamPrecedence;
 import fr.toutatice.ecm.platform.core.constants.ToutaticeNuxeoStudioConst;
@@ -64,19 +65,19 @@ import fr.toutatice.ecm.platform.core.constants.ToutaticeNuxeoStudioConst;
 @Install(precedence = ExtendedSeamPrecedence.TOUTATICE)
 public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
 
-	private static final long serialVersionUID = 7075230311269912496L;
+    private static final long serialVersionUID = 7075230311269912496L;
 
-	private static final Log log = LogFactory.getLog(ToutaticeClipboardActionsBean.class);
-	
+    private static final Log log = LogFactory.getLog(ToutaticeClipboardActionsBean.class);
+
     @In(create = true)
     protected transient DocumentRoutingService routingService;
-    
-	/*
-	 * Empêcher la possibilité de déplacer un document qui est impliqué dans un workflow
-	 * 
-	 * @see org.nuxeo.ecm.webapp.clipboard.ClipboardActionsBean#getCanMoveInside(java.lang.String, org.nuxeo.ecm.core.api.DocumentModel)
-	 */
-	@Override
+
+    /*
+     * Empêcher la possibilité de déplacer un document qui est impliqué dans un workflow
+     * 
+     * @see org.nuxeo.ecm.webapp.clipboard.ClipboardActionsBean#getCanMoveInside(java.lang.String, org.nuxeo.ecm.core.api.DocumentModel)
+     */
+    @Override
     public boolean getCanMoveInside(String listName, DocumentModel document) throws ClientException {
         if (documentsListsManager.isWorkingListEmpty(listName) || document == null) {
             return false;
@@ -91,21 +92,18 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
             for (DocumentModel docModel : documentsListsManager.getWorkingList(listName)) {
                 DocumentRef sourceFolderRef = docModel.getParentRef();
                 String sourceType = docModel.getType();
-                boolean canRemoveDoc = documentManager.hasPermission(
-                        sourceFolderRef, SecurityConstants.REMOVE_CHILDREN);
-                
-                boolean canPasteInCurrentFolder = typeManager.isAllowedSubType(
-                        sourceType, destFolder.getType(),
-                        navigationContext.getCurrentDocument());
-                
+                boolean canRemoveDoc = documentManager.hasPermission(sourceFolderRef, SecurityConstants.REMOVE_CHILDREN);
+
+                boolean canPasteInCurrentFolder = typeManager.isAllowedSubType(sourceType, destFolder.getType(), navigationContext.getCurrentDocument());
+
                 boolean sameFolder = sourceFolderRef.equals(destFolderRef);
-                
+
                 boolean hasActiveWF = false;
                 List<DocumentRoute> documentRoutes = routingService.getDocumentRoutesForAttachedDocument(documentManager, docModel.getId());
                 if (documentRoutes != null && !documentRoutes.isEmpty()) {
-                	hasActiveWF = true;
+                    hasActiveWF = true;
                 }
-                
+
                 if (canRemoveDoc && canPasteInCurrentFolder && !sameFolder && !hasActiveWF) {
                     return true;
                 }
@@ -114,47 +112,40 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
         }
     }
 
-	@Override
-    public List<DocumentModel> moveDocumentsToNewParent(
-            DocumentModel destFolder, List<DocumentModel> docs)
-            throws ClientException {
+    @Override
+    public List<DocumentModel> moveDocumentsToNewParent(DocumentModel destFolder, List<DocumentModel> docs) throws ClientException {
         DocumentRef destFolderRef = destFolder.getRef();
         boolean destinationIsDeleted = LifeCycleConstants.DELETED_STATE.equals(destFolder.getCurrentLifeCycleState());
         List<DocumentModel> newDocs = new ArrayList<DocumentModel>();
         StringBuilder sb = new StringBuilder();
         for (DocumentModel docModel : docs) {
-            
+
             DocumentRef sourceFolderRef = docModel.getParentRef();
 
             String sourceType = docModel.getType();
-            boolean canRemoveDoc = documentManager.hasPermission(
-                    sourceFolderRef, SecurityConstants.REMOVE_CHILDREN);
-            
-            boolean canPasteInCurrentFolder = typeManager.isAllowedSubType(
-                    sourceType, destFolder.getType(),
-                    navigationContext.getCurrentDocument());
-            
+            boolean canRemoveDoc = documentManager.hasPermission(sourceFolderRef, SecurityConstants.REMOVE_CHILDREN);
+
+            boolean canPasteInCurrentFolder = typeManager.isAllowedSubType(sourceType, destFolder.getType(), navigationContext.getCurrentDocument());
+
             boolean sameFolder = sourceFolderRef.equals(destFolderRef);
-            
+
             boolean hasActiveWF = false;
             List<DocumentRoute> documentRoutes = routingService.getDocumentRoutesForAttachedDocument(documentManager, docModel.getId());
             if (documentRoutes != null && !documentRoutes.isEmpty()) {
-            	hasActiveWF = true;
+                hasActiveWF = true;
             }
-            
+
             if (canRemoveDoc && canPasteInCurrentFolder && !sameFolder && !hasActiveWF) {
                 if (destinationIsDeleted) {
                     if (checkDeletedState(docModel)) {
-                        DocumentModel newDoc = documentManager.move(
-                                docModel.getRef(), destFolderRef, null);
+                        DocumentModel newDoc = documentManager.move(docModel.getRef(), destFolderRef, null);
                         setDeleteState(newDoc);
                         newDocs.add(newDoc);
                     } else {
                         addWarnMessage(sb, docModel);
                     }
                 } else {
-                    DocumentModel newDoc = documentManager.move(
-                            docModel.getRef(), destFolderRef, null);
+                    DocumentModel newDoc = documentManager.move(docModel.getRef(), destFolderRef, null);
                     newDocs.add(newDoc);
                 }
             }
@@ -167,65 +158,68 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
         return newDocs;
     }
 
-	/**
-	 * Fix mantis #3409: Mise en ligne: erreur sur l'opération de mise en ligne d'un document copié
-	 */
-	@Override
-	protected List<DocumentModel> recreateDocumentsWithNewParent(DocumentModel parent, List<DocumentModel> documents) throws ClientException {
-		List<DocumentModel> copiedDocsList = new ArrayList<DocumentModel>();
-		
-		// copier les documents
-		List<DocumentModel> newDocs = super.recreateDocumentsWithNewParent(parent, documents);
-		
-		// pour chaque document copié...
-		for (DocumentModel newDoc : newDocs) {
-			// faire passer dans l'état "en projet" les documents validés (pas de conservation de l'historique)
-			newDoc.refresh(DocumentModel.REFRESH_STATE, null);
-			if (ToutaticeNuxeoStudioConst.CST_DOC_STATE_APPROVED.equals(newDoc.getCurrentLifeCycleState())) {
-				if (!newDoc.isCheckedOut()) {
-					newDoc.checkOut();
-				}
-				
-				documentManager.followTransition(newDoc.getRef(), "backToProject");
-			}
-			documentManager.saveDocument(newDoc);
+    /**
+     * Fix mantis #3409: Mise en ligne: erreur sur l'opération de mise en ligne d'un document copié
+     */
+    @Override
+    protected List<DocumentModel> recreateDocumentsWithNewParent(DocumentModel parent, List<DocumentModel> documents) throws ClientException {
+        List<DocumentModel> copiedDocsList = new ArrayList<DocumentModel>();
 
-			// supprimer les proxies car ceux-ci pointent sur le document source et non sa copie (en mode unrestricted pour se soustraire aux droits)
-			if (newDoc.isFolder()) {
-				removeProxy(newDoc);
-			}
-			
-			copiedDocsList.add(newDoc);
-		}
-		
-		return copiedDocsList;
-	}
-	
-	protected void removeProxy(DocumentModel folder) throws ClientException {
-		innerRemoveDocumentProxy runner = new innerRemoveDocumentProxy(documentManager, folder);
-		runner.runUnrestricted();
-	}
+        // copier les documents
+        List<DocumentModel> newDocs = super.recreateDocumentsWithNewParent(parent, documents);
 
-	protected class innerRemoveDocumentProxy extends UnrestrictedSessionRunner {
-		private DocumentModel folder;
-		
-		public innerRemoveDocumentProxy(CoreSession session, DocumentModel folder) {
-			super(session);
-			this.folder = folder;
-		}
-		
-		@Override
-		public void run() throws ClientException {
-			DocumentModelList proxies = this.session.query("SELECT * FROM Document WHERE ecm:path STARTSWITH '" + this.folder.getPathAsString() + "' AND ecm:isProxy = 1");
-			for (DocumentModel proxy : proxies) {
-				this.session.removeDocument(proxy.getRef());
-			}
-		}
-		
-	}
-	
-	 /*
+        // pour chaque document copié...
+        for (DocumentModel newDoc : newDocs) {
+            // faire passer dans l'état "en projet" les documents validés (pas de conservation de l'historique)
+            newDoc.refresh(DocumentModel.REFRESH_STATE, null);
+            if (ToutaticeNuxeoStudioConst.CST_DOC_STATE_APPROVED.equals(newDoc.getCurrentLifeCycleState())) {
+                if (!newDoc.isCheckedOut()) {
+                    newDoc.checkOut();
+                }
+
+                documentManager.followTransition(newDoc.getRef(), "backToProject");
+            }
+            documentManager.saveDocument(newDoc);
+
+            // supprimer les proxies car ceux-ci pointent sur le document source et non sa copie (en mode unrestricted pour se soustraire aux droits)
+            if (newDoc.isFolder()) {
+                removeProxy(newDoc);
+            }
+
+            copiedDocsList.add(newDoc);
+        }
+
+        return copiedDocsList;
+    }
+
+    protected void removeProxy(DocumentModel folder) throws ClientException {
+        innerRemoveDocumentProxy runner = new innerRemoveDocumentProxy(documentManager, folder);
+        runner.runUnrestricted();
+    }
+
+    protected class innerRemoveDocumentProxy extends UnrestrictedSessionRunner {
+
+        private DocumentModel folder;
+
+        public innerRemoveDocumentProxy(CoreSession session, DocumentModel folder) {
+            super(session);
+            this.folder = folder;
+        }
+
+        @Override
+        public void run() throws ClientException {
+            DocumentModelList proxies = this.session
+                    .query("SELECT * FROM Document WHERE ecm:path STARTSWITH '" + this.folder.getPathAsString() + "' AND ecm:isProxy = 1");
+            for (DocumentModel proxy : proxies) {
+                this.session.removeDocument(proxy.getRef());
+            }
+        }
+
+    }
+
+    /*
      * Download redirecting or not according to tmp file size.
+     * 
      * @see org.nuxeo.ecm.webapp.clipboard.ClipboardActionsBean#exportWorklistAsZip(java.util.List, boolean)
      */
     @Override
@@ -237,19 +231,22 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
             try {
                 tmpFile = zipExporter.exportWorklistAsZip(documents, documentManager, exportAllBlobs);
             } catch (ClientException ce) {
-                if(ce.getCause() instanceof ToutaticeZipLimitException) {
-                    if(tmpFile != null) {
+                if (ce.getCause() instanceof ToutaticeZipLimitException) {
+                    if (tmpFile != null) {
                         tmpFile.delete();
                     }
-                    
+
                     facesMessages.add(StatusMessage.Severity.ERROR, resourcesAccessor.getMessages().get("label.zip.limit.exception"));
-                    
+
                     Principal principal = this.documentManager.getPrincipal();
                     String userName = principal != null ? principal.getName() : "unknown";
-                    log.error(String.format("User [%s] tried to export a ZIP which exceeded space left on disk (%s). The operation has been aborted.", userName, 
+                    log.error(String.format("User [%s] tried to export a ZIP which exceeded space left on disk (%s%%). The operation has been aborted.", userName,
                             Framework.getProperty(ToutaticeZipExporterUtils.MAX_SIZE_PROP)));
-                    
+
                     return null;
+                } else if (ce.getCause() instanceof ToutaticeZipFormatException) {
+                    facesMessages.add(StatusMessage.Severity.ERROR, resourcesAccessor.getMessages().get("label.zip.format.exception"));
+                    log.error(ce.getMessage());
                 }
             }
             if (tmpFile == null) {
@@ -270,8 +267,8 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
                     }
                 } else {
                     ComponentUtils.downloadFile(context, "clipboard.zip", tmpFile);
-                    
-                    if(tmpFile != null) {
+
+                    if (tmpFile != null) {
                         tmpFile.delete();
                     }
                 }
@@ -281,9 +278,9 @@ public class ToutaticeClipboardActionsBean extends ClipboardActionsBean {
         } catch (IOException io) {
             throw ClientException.wrap(io);
         } finally {
-//            if (tmpFile != null) {
-//                tmpFile.delete();
-//            }
+            // if (tmpFile != null) {
+            // tmpFile.delete();
+            // }
         }
     }
 
