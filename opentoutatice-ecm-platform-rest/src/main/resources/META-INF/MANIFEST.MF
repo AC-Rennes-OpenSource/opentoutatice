@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-Category: stateful
+Bundle-Name: Opentoutatice rest
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 1
+Bundle-SymbolicName: fr.toutatice.ecm.platform.rest;singleton:=true
+Nuxeo-WebModule: org.nuxeo.ecm.webengine.app.WebEngineModule
+Nuxeo-Component: OSGI-INF/authentication-contrib.xml,

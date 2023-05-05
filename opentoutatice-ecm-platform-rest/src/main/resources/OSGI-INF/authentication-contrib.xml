@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<component name="org.osivia.rest.authentication">
+
+  <!-- Replace Automation specific authentication chain -->
+  <require>org.nuxeo.ecm.login.token.authentication.contrib</require>
+    
+  <extension target="org.nuxeo.ecm.platform.ui.web.auth.service.PluggableAuthenticationService" point="specificChains">
+
+    <specificAuthenticationChain name="rest">
+      <urlPatterns>
+        <url>(.*)/site/thumbnail.*</url>
+      </urlPatterns>
+      <replacementChain>
+        <plugin>ANONYMOUS_AUTH</plugin>
+      </replacementChain>
+    </specificAuthenticationChain>
+
+  </extension>
+
+</component>

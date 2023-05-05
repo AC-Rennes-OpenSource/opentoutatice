@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<module name="thumbnail" root-type="Thumbnail" path="/thumbnail" extends="base">
+
+</module>
