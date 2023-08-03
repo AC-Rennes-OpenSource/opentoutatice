@@ -127,6 +127,7 @@
 				<type>PictureBook</type>
 				<type>File</type>
 				<type>Note</type>
+				<type>Picture</type>
 			</subtypes>
 		</type>
 
@@ -138,6 +139,7 @@
 				<type>PictureBook</type>
 				<type>File</type>
 				<type>Note</type>
+				<type>Picture</type>
 			</subtypes>
 		</type>
 
