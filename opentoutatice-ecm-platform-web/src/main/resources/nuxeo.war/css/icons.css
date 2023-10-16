@@ -3,8 +3,8 @@
 }
 
 .radio-inline.text-overflow.ttcInputradio>input {
-	height: 0;
 	width: auto;
+  	margin: -8px 0 0 -20px !important;
 }
 
 .radio-inline.text-overflow.ttcInputradio>img {
