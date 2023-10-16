@@ -62,7 +62,7 @@ public class ToutaticeExportedZipImporter extends ExportedZipImporter {
         DocumentWriter writer = new ToutaticeDocumentModelWriter(documentManager, path,
                 10);
         reader.close();
-        reader = new NuxeoArchiveReader(tmp);
+        reader = new ToutaticeNuxeoArchiveReader(tmp);
 
         DocumentRef resultingRef;
         if (overwrite && importWithIds) {

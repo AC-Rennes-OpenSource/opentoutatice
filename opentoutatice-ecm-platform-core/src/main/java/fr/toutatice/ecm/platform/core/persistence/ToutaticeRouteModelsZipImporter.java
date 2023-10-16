@@ -2,6 +2,7 @@ package fr.toutatice.ecm.platform.core.persistence;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
@@ -20,6 +21,7 @@ import org.nuxeo.ecm.core.io.DocumentWriter;
 import org.nuxeo.ecm.core.io.ExportedDocument;
 import org.nuxeo.ecm.core.io.impl.DocumentPipeImpl;
 import org.nuxeo.ecm.core.io.impl.plugins.DocumentModelWriter;
+import org.nuxeo.ecm.core.io.impl.plugins.NuxeoArchiveReader;
 import org.nuxeo.ecm.platform.filemanager.service.extension.ExportedZipImporter;
 import org.nuxeo.ecm.platform.types.TypeManager;
 
@@ -28,6 +30,9 @@ public class ToutaticeRouteModelsZipImporter extends ExportedZipImporter {
 	private static final long serialVersionUID = -3660849547853979447L;
 	
 	private static final Log log = LogFactory.getLog(ToutaticeRouteModelsZipImporter.class);
+	
+	private static final String[] ALLOWED_TYPES = {"DocumentRoute", "StepFolder", "DocumentRouteStep",
+	        "ConditionalStepFolder", "RouteNode"};
 
     @Override
     public DocumentModel create(CoreSession session, Blob content, String path,
@@ -44,8 +49,13 @@ public class ToutaticeRouteModelsZipImporter extends ExportedZipImporter {
         }
 
         boolean overWrite = false;
-        DocumentReader reader = new ToutaticeNuxeoArchiveReader(tmp);
+        DocumentReader reader = new NuxeoArchiveReader(tmp);
         ExportedDocument root = reader.read();
+        if(!Arrays.asList(ALLOWED_TYPES).contains(root.getType())) {
+            reader.close();
+            tmp.delete();
+            return null;
+        }
         PathRef rootRef = new PathRef(path, root.getPath().toString());
         ACP currentRouteModelACP = null;
         if (session.exists(rootRef)) {
@@ -57,11 +67,12 @@ public class ToutaticeRouteModelsZipImporter extends ExportedZipImporter {
                 currentRouteModelACP = routeModel.getACP();
                 session.removeDocument(rootRef);
             }
+            
         }
 
         DocumentWriter writer = new DocumentModelWriter(session, path, 10);
         reader.close();
-        reader = new ToutaticeNuxeoArchiveReader(tmp);
+        reader = new NuxeoArchiveReader(tmp);
 
         DocumentRef resultingRef;
         if (overwrite && overWrite) {
