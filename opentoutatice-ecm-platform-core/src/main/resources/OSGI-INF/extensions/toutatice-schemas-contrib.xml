@@ -12,7 +12,7 @@
 		<schema name="toutatice_space" prefix="ttcs"
 			src="schemas/toutatice-space.xsd" />
 		<schema name="toutatice_navigation" prefix="ttcn"
-			src="schemas/toutatice-ecm-platform-core-schema.xsd" />
+			src="schemas/toutatice-navigation.xsd" />
 		<schema name="toutatice_domain" prefix="ttcd"
 			src="schemas/toutatice-domain.xsd" />
 
