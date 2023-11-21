@@ -33,11 +33,6 @@
 			<fields>
 				<field>wconf:code</field>
 			</fields>
-			<properties widgetMode="edit">
-				<property name="required">false</property>
-				<property name="validator">#{toutaticeValidator.validateWebConfCode}
-				</property>
-			</properties>
 		</widget>
 		<widget name="code2" type="text">
 			<labels>

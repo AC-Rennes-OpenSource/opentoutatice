@@ -124,23 +124,29 @@ public class ConfigurationBeanHelper implements Serializable {
     protected static List<DocumentModel> mergeGlobalNLocalConfs(List<DocumentModel> globalConfs, DocumentModelList localConfs, String confType) {
         List<DocumentModel> mergedConfs = new ArrayList<DocumentModel>(0);
 
-        mergedConfs = getSelectedConfsByType(globalConfs, confType);
-
+        List<DocumentModel> domainsConfs = getSelectedConfsByType(globalConfs, confType);
+        List<DocumentModel> overridenConfs = new ArrayList<DocumentModel>();
         // Diff to remove overriden confs
         /* FIXME: define method to use Collections.removeAll ? */
         for (DocumentModel localConf : localConfs) {
             String localCode = (String) localConf.getPropertyValue(ToutaticeNuxeoStudioConst.CST_DOC_XPATH_WEB_CONF_CODE);
             boolean hasCode = false;
-            for (Iterator<DocumentModel> it = mergedConfs.iterator(); it.hasNext() && !hasCode;) {
+            for (Iterator<DocumentModel> it = domainsConfs.iterator(); it.hasNext() && !hasCode;) {
                 DocumentModel globalConf = it.next();
                 String globalCode = (String) globalConf.getPropertyValue(ToutaticeNuxeoStudioConst.CST_DOC_XPATH_WEB_CONF_CODE);
                 if (localCode.equals(globalCode)) {
                     it.remove();
-                    mergedConfs.add(localConf);
+                    overridenConfs.add(localConf);
                     hasCode = true;
                 }
             }
         }
+        localConfs.removeAll(overridenConfs);
+        
+        mergedConfs.addAll(domainsConfs);
+        mergedConfs.addAll(overridenConfs);
+        mergedConfs.addAll(localConfs);
+        
         return mergedConfs;
     }
 
