@@ -2,6 +2,8 @@
 <component name="fr.toutatice.ecm.platform.automation.contrib"
 	version="1.0">
 
+	<require>org.nuxeo.ecm.core.automation.coreContrib</require>
+
 	<extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent"
 		point="operations">
 
@@ -13,6 +15,7 @@
         <operation class="fr.toutatice.ecm.platform.automation.document.ImportZipDocument" />
 
 		<operation class="fr.toutatice.ecm.platform.automation.blob.AttachBlobs" />
+		<operation class="fr.toutatice.ecm.platform.automation.blob.ToutaticeGetDocumentBlob" replace="true" />
 		
 		<operation
 			class="fr.toutatice.ecm.platform.automation.FetchPublishedDocument" />
