@@ -35,7 +35,7 @@
         <c:forEach items="#{src}" var="conf">
 
             <c:set var="isChecked"
-                value="#{nxu:test(((!empty conf.wconf.code) and (!empty value) and (value.contains(conf.wconf.code)) 
+                value="#{nxu:test(((!empty conf.wconf.code) and (!empty value) and (value.equals(conf.wconf.code))
                     or ((empty conf.wconf.code) and (empty value))),'checked','')}" />
 
             <div class="col-sm-3">
