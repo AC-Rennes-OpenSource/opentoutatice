@@ -41,6 +41,7 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.UnrestrictedSessionRunner;
 import org.nuxeo.ecm.core.api.impl.DocumentModelListImpl;
+import org.nuxeo.ecm.core.lifecycle.LifeCycle;
 import org.nuxeo.ecm.platform.ui.web.api.NavigationContext;
 import org.nuxeo.ecm.platform.ui.web.util.SeamComponentCallHelper;
 
@@ -80,6 +81,10 @@ public class ConfigurationBeanHelper implements Serializable {
     @In(create = true)
     protected Map<String, String> messages;
 
+    public static ConfigurationBeanHelper get() {
+        return new ConfigurationBeanHelper();
+    }
+
     /**
      * Get the current JSF instance of this class
      *
@@ -102,6 +107,11 @@ public class ConfigurationBeanHelper implements Serializable {
 
         return getConfigs(confType, session, domain);
 
+    }
+
+    public DocumentModelList getConfigs(String confType, DocumentModel currentDoc, CoreSession session) {
+        DocumentModel domain = ToutaticeDocumentHelper.getDomain(session, currentDoc, true);
+        return getConfigs(confType, session, domain);
     }
 
     public DocumentModelList getConfigs(String confType, CoreSession session, DocumentModel domain) {
@@ -407,15 +417,35 @@ public class ConfigurationBeanHelper implements Serializable {
     private String getPropertyValue(String paramName) {
         DocumentModelList configs = getConfigs("websiteConfig");
 
-        if (configs.size() > 0) {
-            DocumentModel websiteconfig = configs.get(0);
+        if (configs != null && !configs.isEmpty()) {
+            for(DocumentModel websiteconfig : configs) {
 
-            Map<String, Object> properties = websiteconfig.getProperties("webconfiguration");
+                Map<String, Object> properties = websiteconfig.getProperties("webconfiguration");
 
-            List<Map<String, String>> options = (List<Map<String, String>>) properties.get(WCONF_OPTIONS);
-            for (Map<String, String> option : options) {
-                if (option.get("propertyName").equals(paramName)) {
-                    return option.get("propertyDefaultValue");
+                List<Map<String, String>> options = (List<Map<String, String>>) properties.get(WCONF_OPTIONS);
+                for (Map<String, String> option : options) {
+                    if (option.get("propertyName").equals(paramName)) {
+                        return option.get("propertyDefaultValue");
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getPropertyValue(String paramName, DocumentModel doc, CoreSession session) {
+        DocumentModelList configs = getConfigs("websiteConfig", doc, session);
+
+        if (configs != null && !configs.isEmpty()) {
+            for(DocumentModel websiteconfig : configs) {
+
+                Map<String, Object> properties = websiteconfig.getProperties("webconfiguration");
+
+                List<Map<String, String>> options = (List<Map<String, String>>) properties.get(WCONF_OPTIONS);
+                for (Map<String, String> option : options) {
+                    if (option.get("propertyName").equals(paramName)) {
+                        return option.get("propertyDefaultValue");
+                    }
                 }
             }
         }
@@ -425,6 +455,11 @@ public class ConfigurationBeanHelper implements Serializable {
 
     public String getWebsiteParamString(String paramName, String defaultValue) {
         String propertyValue = getPropertyValue(paramName);
+        return propertyValue == null ? defaultValue : propertyValue;
+    }
+
+    public String getWebsiteParamString(String paramName, String defaultValue, DocumentModel doc, CoreSession session) {
+        String propertyValue = getPropertyValue(paramName, doc, session);
         return propertyValue == null ? defaultValue : propertyValue;
     }
 
