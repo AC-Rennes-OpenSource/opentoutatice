@@ -5,7 +5,7 @@
 
 	<groupId>opentoutatice-ecm.platform</groupId>
 	<artifactId>opentoutatice-ecm-platform-parent</artifactId>
-	<version>RAB-4.7.46</version>
+	<version>4.7.56-RAB</version>
 	<packaging>pom</packaging>
 	<name>open toutatice plate-forme</name>
 
@@ -456,7 +456,35 @@
 								<additionalOption>-Xdoclint:none</additionalOption>
 							</additionalOptions>
 						</configuration>
-					</plugin> 				
+					</plugin>
+
+				<!--GitFlow-->
+				<plugin>
+					<groupId>com.amashchenko.maven.plugin</groupId>
+					<artifactId>gitflow-maven-plugin</artifactId>
+					<version>1.21.0</version>
+					<configuration>
+						<gitFlowConfig>
+							<productionBranch>master-RAB</productionBranch>
+							<developmentBranch>develop-RAB</developmentBranch>
+							<featureBranchPrefix>feature-RAB/</featureBranchPrefix>
+							<releaseBranchPrefix>release-RAB/</releaseBranchPrefix>
+							<hotfixBranchPrefix>hotfix-RAB/</hotfixBranchPrefix>
+							<supportBranchPrefix>support-RAB/</supportBranchPrefix>
+							<versionTagPrefix>RAB-</versionTagPrefix>
+							<origin>origin</origin>
+						</gitFlowConfig>
+
+						<commitMessages>
+							<releaseStartMessage>🔖 Version @{version}</releaseStartMessage>
+							<releaseFinishMessage>🔖 Version @{version}</releaseFinishMessage>
+							<versionUpdateMessage>🔖 Version @{version}</versionUpdateMessage>
+						</commitMessages>
+
+						<digitsOnlyDevVersion>true</digitsOnlyDevVersion>
+						<updateVersionDigitToIncrement>3</updateVersionDigitToIncrement>
+					</configuration>
+				</plugin>
 				
 			</plugins>
 		</pluginManagement>

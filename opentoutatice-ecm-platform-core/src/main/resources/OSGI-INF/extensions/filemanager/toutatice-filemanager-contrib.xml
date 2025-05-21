@@ -3,22 +3,23 @@
     
 	<require>org.nuxeo.ecm.platform.filemanager.service.FileManagerService</require>
 	<require>org.nuxeo.ecm.platform.filemanager.service.FileManagerService.Plugins</require>
+	<require>org.nuxeo.ecm.platform.routing.FileManagerService.contrib</require>
 
 	<extension
 		target="org.nuxeo.ecm.platform.filemanager.service.FileManagerService"
 		point="plugins">
-
-		<plugin name="ExportedArchivePlugin"
+		
+		<plugin name="ToutaticeRouteModelsImporter" enabled="true"
+			class="fr.toutatice.ecm.platform.core.persistence.ToutaticeRouteModelsZipImporter"
+			order="3">
+			<filter>application/zip</filter>
+		</plugin>
+		
+		<plugin name="ToutaticeExportedArchivePlugin"
 	      class="fr.toutatice.ecm.platform.core.persistence.ToutaticeExportedZipImporter"
-	      order="10">
+	      order="4">
 	      <filter>application/zip</filter>
 	    </plugin>
-
-		<!-- <plugin name="ToutaticeRouteModelsImporter" enabled="true"
-			class="fr.toutatice.ecm.platform.core.persistence.ToutaticeRouteModelsZipImporter"
-			order="5">
-			<filter>application/zip</filter>
-		</plugin> -->
 		
 		<!-- Disable NoteImporter: all binaries are imported as File -->
 		<plugin name="NoteImporter" enabled="false" />

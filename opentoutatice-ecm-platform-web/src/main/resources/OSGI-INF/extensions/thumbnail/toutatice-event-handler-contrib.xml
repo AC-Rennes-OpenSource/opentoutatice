@@ -4,10 +4,6 @@
 	<require>org.nuxeo.ecm.core.operation.OperationServiceComponent
 	</require>
 
-
-	<!-- TODO : rendre paramétrable l'activation et les préférences de resizing 
-		par domaine -->
-
 	<extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent"
 		point="event-handlers">
 
@@ -15,7 +11,7 @@
 			<event>documentCreated</event>
 			<event>beforeDocumentModification</event>
 			<filters>
-				<condition>Document.hasSchema('toutatice')</condition>
+				<condition>Document.hasSchema('toutatice') &amp;&amp; fr.toutatice.ecm.platform.service.fragments.configuration.ConfigurationBeanHelper.get().getWebsiteParamString("vignette_resizing", "true", Document.getDoc(), Document.getSession()) == "true"</condition>
 				<attribute>Mutable Document</attribute>
 			</filters>
 		</handler>
