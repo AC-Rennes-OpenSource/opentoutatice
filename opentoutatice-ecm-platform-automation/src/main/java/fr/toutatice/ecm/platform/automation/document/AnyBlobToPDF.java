@@ -20,6 +20,7 @@ import org.nuxeo.ecm.automation.core.annotations.Param;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
+import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
 import org.nuxeo.ecm.core.convert.api.ConversionException;
 import org.nuxeo.ecm.core.convert.api.ConversionService;
 import org.nuxeo.runtime.api.Framework;
@@ -115,6 +116,10 @@ public class AnyBlobToPDF {
 
         result = pdfBh.getBlob();
 
+        return adjustBlobName(result, bh);
+    }
+
+    private Blob adjustBlobName(Blob result, BlobHolder bh) {
         String fname = result.getFilename();
         String filename = bh.getBlob().getFilename();
         if (filename != null && !filename.isEmpty()) {
@@ -134,6 +139,31 @@ public class AnyBlobToPDF {
         result.setMimeType("application/pdf");
 
         return result;
+    }
+
+    @OperationMethod
+    public Blob run(Blob blob) throws Exception {
+        if ("application/pdf".equals(blob.getMimeType())) {
+            return blob;
+        }
+        long startConversionDate = new Date().getTime();
+        BlobHolder bh = new SimpleBlobHolder(blob);
+        BlobHolder pdfBh = null;
+        try {
+            pdfBh = this.service.convert(this.converterName, bh, new HashMap<String, Serializable>());
+        } catch(ConversionException e) {
+            sofficelog.error(e);
+        }
+        if(pdfBh == null || pdfBh.getBlob() == null) {
+            long elapsed = new Date().getTime() - startConversionDate;
+            sofficelog.warn("Unable to convert "+ blob.getFilename() +" (elapsed time : "+elapsed+ " ms.) ");
+            return null;
+        }
+        else if(sofficelog.isDebugEnabled()) {
+            long elapsed = new Date().getTime() - startConversionDate;
+            sofficelog.debug("End of conversion of "+ blob.getFilename() + " (elapsed time : "+elapsed+ " ms.) ");
+        }
+        return adjustBlobName(pdfBh.getBlob(), bh);
     }
     
     /**
